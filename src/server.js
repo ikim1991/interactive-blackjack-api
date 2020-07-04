@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3001;
 
 const router = require('./router');
 const { generateMessage } = require('./utils/users');
-const { user } = require('./utils/database');
+const { user } = require('./utils/users');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,8 +16,8 @@ const io = socketio(server);
 io.on('connection', (socket) => {
   console.log("Client Connected...");
 
-  socket.on("sendMessage", ({ user, message}) => {
-    io.emit("message", generateMessage(user, message))
+  socket.on("sendMessage", ({username, message}) => {
+    io.emit("message", generateMessage(username, message))
   })
 
   socket.on('disconnect', () => {
