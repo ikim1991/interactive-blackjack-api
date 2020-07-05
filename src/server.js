@@ -5,8 +5,8 @@ const http = require('http');
 const PORT = process.env.PORT || 3001;
 
 const router = require('./router');
-const { generateMessage } = require('./utils/users');
-const { user } = require('./utils/users');
+const { generateMessage, findUser, userAuth } = require('./utils/users');
+const { rooms } = require('./utils/rooms');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,19 +16,31 @@ const io = socketio(server);
 io.on('connection', (socket) => {
   console.log("Client Connected...");
 
-  socket.on("sendMessage", ({username, message}) => {
+  socket.on('login', (userlogin) => {
+    const { username, server } = userlogin
+    console.log(`${username} has joined...`)
+    rooms[server].users.push(username)
+  })
+
+  socket.on('sendMessage', ({username, message}) => {
     io.emit("message", generateMessage(username, message))
   })
 
+  socket.on('logout', (userlogout) => {
+    const { username, server } = userlogout
+    rooms[server].users = rooms[server].users.filter(user => user !== username)
+    userAuth(username)
+    console.log(`${username} has left...`)
+  })
+
   socket.on('disconnect', () => {
-    console.log("User has left...")
+    console.log("Client Disconnected...")
   })
 })
 
 app.use(express.json())
 app.use(cors())
 app.use(router);
-
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}...`)
