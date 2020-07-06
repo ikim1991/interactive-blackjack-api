@@ -18,20 +18,22 @@ io.on('connection', (socket) => {
 
   socket.on('login', (userlogin) => {
     const { username, server, allUsers } = userlogin
+
+    socket.join(server)
+
     console.log(`${username} has joined...`)
-    console.log(allUsers)
-    io.emit('updateUsers', allUsers)
+    io.to(server).emit('updateUsers', allUsers)
   })
 
-  socket.on('sendMessage', ({username, message}) => {
-    io.emit("message", generateMessage(username, message))
+  socket.on('sendMessage', ({user, message}) => {
+    io.to(user.server).emit("message", generateMessage(user.username, message))
   })
 
   socket.on('logout', (userlogout) => {
     const { username, server } = userlogout
     rooms[server].users = rooms[server].users.filter(user => user !== username)
     userAuth(username)
-    io.emit('updateUsers', rooms[server].users)
+    io.to(server).emit('updateUsers', rooms[server].users)
     console.log(`${username} has left...`)
   })
 
