@@ -17,9 +17,10 @@ io.on('connection', (socket) => {
   console.log("Client Connected...");
 
   socket.on('login', (userlogin) => {
-    const { username, server } = userlogin
+    const { username, server, allUsers } = userlogin
     console.log(`${username} has joined...`)
-    rooms[server].users.push(username)
+    console.log(allUsers)
+    io.emit('updateUsers', allUsers)
   })
 
   socket.on('sendMessage', ({username, message}) => {
@@ -30,6 +31,7 @@ io.on('connection', (socket) => {
     const { username, server } = userlogout
     rooms[server].users = rooms[server].users.filter(user => user !== username)
     userAuth(username)
+    io.emit('updateUsers', rooms[server].users)
     console.log(`${username} has left...`)
   })
 
