@@ -13,20 +13,27 @@ const server = http.createServer(app);
 const cors = require('cors');
 const io = socketio(server);
 
+
 io.on('connection', (socket) => {
   console.log("Client Connected...");
 
   socket.on('login', (userlogin) => {
-    const { username, server, allUsers } = userlogin
+    const { username, server, allUsers, game } = userlogin
 
     socket.join(server)
 
     console.log(`${username} has joined...`)
     io.to(server).emit('updateUsers', allUsers)
+    socket.emit('loginState', game)
   })
 
   socket.on('sendMessage', ({user, message}) => {
-    io.to(user.server).emit("message", generateMessage(user.username, message))
+    io.to(user.server).emit('message', generateMessage(user.username, message))
+  })
+
+  socket.on('seatPlayer', (user, seatNumber) => {
+    rooms[user.server].game.seatPlayer(user, seatNumber)
+    io.to(user.server).emit('updateGame', rooms[user.server].game)
   })
 
   socket.on('logout', (userlogout) => {

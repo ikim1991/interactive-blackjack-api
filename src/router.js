@@ -12,7 +12,7 @@ router.post('/signin', async (req, res) => {
   if(user && user.password === req.body.password){
     delete user.password
     rooms[req.body.server].users.push(user.username)
-    return res.send({...user, server: req.body.server, authenticated: userAuth(user.username), allUsers: rooms[req.body.server].users, room: rooms[req.body.server].value})
+    return res.send({...user, server: req.body.server, authenticated: userAuth(user.username), allUsers: rooms[req.body.server].users, room: rooms[req.body.server].value, game: rooms[req.body.server].game})
   }
   return res.status(400).send({error: "Invalid Username & Password"})
 })

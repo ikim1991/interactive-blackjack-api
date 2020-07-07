@@ -3,7 +3,15 @@ const users = [
     username: "admin",
     password: "admin",
     chips: 1000000000,
-    authenticated: false
+    authenticated: false,
+    seated: false
+  },
+  {
+    username: "tester",
+    password: "tester",
+    chips: 1000,
+    authenticated: false,
+    seated:false
   }
 ]
 
