@@ -6,7 +6,8 @@ const users = [
     authenticated: false,
     playerNumber: "",
     seated: false,
-    turn: false
+    turn: false,
+    sessionID: ""
   },
   {
     username: "tester",
@@ -15,7 +16,8 @@ const users = [
     authenticated: false,
     playerNumber: "",
     seated:false,
-    turn: false
+    turn: false,
+    sessionID: ""
   }
 ]
 
@@ -39,6 +41,13 @@ const userAuth = (username) => {
       user.authenticated = true
       return true
     }
+  }
+}
+
+const userSession = (username, id = "") => {
+  const user = findUser(username)
+  if(user){
+    user.sessionID = id
   }
 }
 
@@ -78,6 +87,7 @@ module.exports = {
   users,
   findUser,
   userAuth,
+  userSession,
   registerUser,
   seatUser,
   unseatUser,

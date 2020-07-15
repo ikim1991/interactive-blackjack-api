@@ -5,7 +5,7 @@ const http = require('http');
 const PORT = process.env.PORT || 3001;
 
 const router = require('./router');
-const { generateMessage, findUser, userAuth, seatUser, unseatUser, sendUserData } = require('./utils/users');
+const { generateMessage, findUser, userAuth, userSession, seatUser, unseatUser, sendUserData } = require('./utils/users');
 const { rooms } = require('./utils/rooms');
 const Game = require('./utils/Game');
 
@@ -22,8 +22,9 @@ io.on('connection', (socket) => {
 
   socket.on('login', (userlogin) => {
     const { username, server, allUsers, game } = userlogin
+    const sessionID = socket.id
+    userSession(username, sessionID)
     socket.join(server)
-
     console.log(`${username} has joined...`)
     io.to(server).emit('updateUsers', allUsers)
     socket.emit('loginState', game)
@@ -42,19 +43,24 @@ io.on('connection', (socket) => {
     }
   })
 
-  socket.on('placeBet', (bet, type) => {
-    console.log(bet, type)
+  socket.on('placeBet', (bet, type, user) => {
+    if(type === "bet"){
+      console.log(bet, user)
+    }
+
+    if(type === "lucky"){
+      console.log(bet, user)
+    }
   })
 
   socket.on('logout', (userlogout) => {
-    console.log(userlogout, "userlogout")
     const { username, seated, server, playerNumber } = userlogout
     rooms[server].users = rooms[server].users.filter(user => user !== username)
     userAuth(username)
+    userSession(username)
     if(seated){
       rooms[server].game.playerExit(userlogout, playerNumber)
     }
-    console.log(sendUserData(username, server), "sendUserData")
     io.to(server).emit('updateUsers', rooms[server].users)
     console.log(`${username} has left...`)
   })
