@@ -1,28 +1,16 @@
 const Player = require('./Player');
 const Deck = require('./Deck');
-const { users, findUser } = require('./users');
+const { users, findUser, seatUser, unseatUser } = require('./users');
 
 class Game{
   constructor(){
     this.game = {
-      phase: {
-        waiting: true,
-        betting: false,
-        firstDeal: false,
-        secondDeal: false,
-        playerOne: false,
-        playerTwo: false,
-        playerThree: false,
-        playerFour: false,
-        playerFive: false,
-        dealersTurn: false,
-        results: false,
-        distribution: false
-      },
+      phase: "waiting",
       dealer: {
         hand: [],
         firstCard: [],
-        count: 0
+        count: 0,
+        text: "Place your Bets!"
       },
       players: {
         one: new Player(),
@@ -36,18 +24,35 @@ class Game{
   }
 
   seatPlayer(user, seatNumber){
-    if(!findUser(user.username).seated){
-      this.game.players[seatNumber].seatPlayer(user)
-      findUser(user.username).seated = true
-    }
+    this.game.players[seatNumber].seatPlayer(user, seatNumber)
+    seatUser(user, seatNumber)
   }
 
   playerExit(user, seatNumber){
-    if(user.username === this.players[seatNumber].user.username){
-      this.players = new Player()
+    if(user.seated){
+      this.game.players[seatNumber].defaultPlayer()
+      unseatUser(user)
     }
   }
 
+  shuffleCheck(){
+    if(this.checkForPlauers()){
+      this.deck = (new Deck()).shuffleDeck()
+    }
+  }
+
+  checkForPlayers(){
+    for(let [key, value] of Object.entries(this.game.players)){
+      if(value.seated){
+        return true
+      }
+    }
+    return false
+  }
+
+  waitingPhase(){
+    this.game.phase = 'waiting'
+  }
 }
 
 module.exports = Game;

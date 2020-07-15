@@ -5,8 +5,9 @@ const http = require('http');
 const PORT = process.env.PORT || 3001;
 
 const router = require('./router');
-const { generateMessage, findUser, userAuth } = require('./utils/users');
+const { generateMessage, findUser, userAuth, seatUser, unseatUser, sendUserData } = require('./utils/users');
 const { rooms } = require('./utils/rooms');
+const Game = require('./utils/Game');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,12 +15,13 @@ const cors = require('cors');
 const io = socketio(server);
 
 
+const game = new Game()
+
 io.on('connection', (socket) => {
   console.log("Client Connected...");
 
   socket.on('login', (userlogin) => {
     const { username, server, allUsers, game } = userlogin
-
     socket.join(server)
 
     console.log(`${username} has joined...`)
@@ -32,14 +34,27 @@ io.on('connection', (socket) => {
   })
 
   socket.on('seatPlayer', (user, seatNumber) => {
-    rooms[user.server].game.seatPlayer(user, seatNumber)
-    io.to(user.server).emit('updateGame', rooms[user.server].game)
+    if(!findUser(user.username).seated){
+      rooms[user.server].game.seatPlayer(user, seatNumber)
+      io.to(user.server).emit('updateGame', rooms[user.server].game, sendUserData(user.username, user.server))
+    } else{
+      console.log(`${user.username} is already seated...`)
+    }
+  })
+
+  socket.on('placeBet', (bet, type) => {
+    console.log(bet, type)
   })
 
   socket.on('logout', (userlogout) => {
-    const { username, server } = userlogout
+    console.log(userlogout, "userlogout")
+    const { username, seated, server, playerNumber } = userlogout
     rooms[server].users = rooms[server].users.filter(user => user !== username)
     userAuth(username)
+    if(seated){
+      rooms[server].game.playerExit(userlogout, playerNumber)
+    }
+    console.log(sendUserData(username, server), "sendUserData")
     io.to(server).emit('updateUsers', rooms[server].users)
     console.log(`${username} has left...`)
   })

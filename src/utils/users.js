@@ -4,19 +4,29 @@ const users = [
     password: "admin",
     chips: 1000000000,
     authenticated: false,
-    seated: false
+    playerNumber: "",
+    seated: false,
+    turn: false
   },
   {
     username: "tester",
     password: "tester",
     chips: 1000,
     authenticated: false,
-    seated:false
+    playerNumber: "",
+    seated:false,
+    turn: false
   }
 ]
 
 const findUser = (username) => {
   return users.find(user => user.username === username)
+}
+
+const sendUserData = (username, server) => {
+  const user = {...findUser(username), server: server}
+  delete user.password
+  return user
 }
 
 const userAuth = (username) => {
@@ -31,6 +41,20 @@ const userAuth = (username) => {
     }
   }
 }
+
+const seatUser = (user, seatNumber) => {
+  const u = findUser(user.username)
+  u.seated = true
+  u.playerNumber = seatNumber
+}
+
+const unseatUser = (user) => {
+  const u = findUser(user.username)
+  u.seated = false
+  u.turn = false
+  u.playerNumber = ""
+}
+
 
 const registerUser = (username, password) => {
   users.push({
@@ -54,5 +78,8 @@ module.exports = {
   users,
   findUser,
   userAuth,
-  registerUser
+  registerUser,
+  seatUser,
+  unseatUser,
+  sendUserData
 }

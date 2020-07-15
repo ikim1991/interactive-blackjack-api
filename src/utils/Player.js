@@ -1,23 +1,38 @@
+const { findUser, seatUser, unseatUser } = require('./users');
+
 class Player{
   constructor(){
     this.user = {
       username: "",
-      chips: 0
+      chips: 0,
+      playerNumber: "",
+      seated: false,
+      turn: false
     };
-    this.seated = false;
-    this.turn = false;
-    this.seated = false;
-    this.turn = false;
     this.hand = [];
     this.count = 0;
     this.bet = 0;
     this.lucky = 0;
   }
 
-  seatPlayer(user) {
-    this.user.username = user.username
-    this.user.chips = user.chips
-    this.seated = true
+  seatPlayer(user, seatNumber) {
+    this.user = {
+      username: user.username,
+      chips: user.chips,
+      playerNumber: seatNumber,
+      seated: true,
+      turn: false
+    }
+  }
+
+  defaultPlayer(){
+    this.user = {
+      username: "",
+      chips: 0,
+      playerNumber: "",
+      seated: false,
+      turn: false
+    }
   }
 
   placeBet(value) {

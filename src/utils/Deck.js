@@ -25,7 +25,7 @@ class Deck{
       this.deck[i] = this.deck[random]
       this.deck[random] = tmp
     }
-    console.log(this.deck)
+    return {...this.deck}
   }
 }
 
