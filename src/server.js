@@ -47,12 +47,16 @@ io.on('connection', (socket) => {
 
   socket.on('placeBet', (bet, type, user) => {
     if(type === "bet"){
-      console.log(bet, user)
+      rooms[user.server].game.placeBet(bet, user)
     }
 
     if(type === "lucky"){
-      console.log(bet, user)
+      rooms[user.server].game.placeLucky(bet, user)
     }
+
+    console.log(rooms[user.server].game.game.players)
+    console.log(sendUserData(user.username, user.server))
+
   })
 
   socket.on('logout', (userlogout) => {

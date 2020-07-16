@@ -50,9 +50,24 @@ class Game{
     return false
   }
 
-  waitingPhase(){
-    this.game.phase = 'waiting'
+  placeBet(bet, user){
+    const u = findUser(user.username)
+    if(bet <= u.chips){
+      this.game.players[user.playerNumber].bet += bet
+      this.game.players[user.playerNumber].user.chips -= bet
+      u.chips -= bet
+    }
   }
+
+  placeLucky(bet, user){
+    const u = findUser(user.username)
+    if(bet <= u.chips){
+      this.game.players[user.playerNumber].lucky += bet
+      this.game.players[user.playerNumber].user.chips -= bet
+      u.chips -= bet
+    }
+  }
+
 }
 
 module.exports = Game;
