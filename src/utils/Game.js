@@ -1,6 +1,6 @@
 const Player = require('./Player');
 const Deck = require('./Deck');
-const { users, findUser, seatUser, unseatUser } = require('./users');
+const { users, findUser, seatUser, unseatUser, sendUserData } = require('./users');
 
 class Game{
   constructor(){
@@ -66,6 +66,20 @@ class Game{
       this.game.players[user.playerNumber].user.chips -= bet
       u.chips -= bet
     }
+  }
+
+  clearBet(user){
+    const u = findUser(user.username)
+    this.game.players[user.playerNumber].user.chips += this.game.players[user.playerNumber].bet
+    u.chips += this.game.players[user.playerNumber].bet
+    this.game.players[user.playerNumber].bet = 0
+  }
+
+  clearLucky(user){
+    const u = findUser(user.username)
+    this.game.players[user.playerNumber].user.chips += this.game.players[user.playerNumber].lucky
+    u.chips += this.game.players[user.playerNumber].lucky
+    this.game.players[user.playerNumber].lucky = 0
   }
 
 }

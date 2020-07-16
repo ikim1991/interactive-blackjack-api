@@ -48,15 +48,29 @@ io.on('connection', (socket) => {
   socket.on('placeBet', (bet, type, user) => {
     if(type === "bet"){
       rooms[user.server].game.placeBet(bet, user)
+      socket.emit('updateUser', sendUserData(user.username, user.server))
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
     }
 
     if(type === "lucky"){
       rooms[user.server].game.placeLucky(bet, user)
+      socket.emit('updateUser', sendUserData(user.username, user.server))
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+    }
+  })
+
+  socket.on('clearBet', (type, user) => {
+    if(type === "bet"){
+      rooms[user.server].game.clearBet(user)
+      socket.emit('updateUser', sendUserData(user.username, user.server))
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
     }
 
-    console.log(rooms[user.server].game.game.players)
-    console.log(sendUserData(user.username, user.server))
-
+    if(type === "lucky"){
+      rooms[user.server].game.clearLucky(user)
+      socket.emit('updateUser', sendUserData(user.username, user.server))
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+    }
   })
 
   socket.on('logout', (userlogout) => {
