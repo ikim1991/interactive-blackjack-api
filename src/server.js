@@ -28,6 +28,7 @@ io.on('connection', (socket) => {
     console.log(`${username} has joined...`)
     io.to(server).emit('updateUsers', allUsers)
     socket.emit('loginState', game)
+    socket.emit('updateUser', sendUserData(username, server))
   })
 
   socket.on('sendMessage', ({user, message}) => {
@@ -37,7 +38,8 @@ io.on('connection', (socket) => {
   socket.on('seatPlayer', (user, seatNumber) => {
     if(!findUser(user.username).seated){
       rooms[user.server].game.seatPlayer(user, seatNumber)
-      io.to(user.server).emit('updateGame', rooms[user.server].game, sendUserData(user.username, user.server))
+      socket.emit('updateUser', sendUserData(user.username, user.server))
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
     } else{
       console.log(`${user.username} is already seated...`)
     }
@@ -61,6 +63,7 @@ io.on('connection', (socket) => {
     if(seated){
       rooms[server].game.playerExit(userlogout, playerNumber)
     }
+    io.to(server).emit('updateGame', rooms[server].game)
     io.to(server).emit('updateUsers', rooms[server].users)
     console.log(`${username} has left...`)
   })
