@@ -33,6 +33,10 @@ class Player{
       seated: false,
       turn: false
     }
+    this.hand = [];
+    this.count = 0;
+    this.bet = 0;
+    this.lucky = 0;
   }
 
   placeBet(value) {

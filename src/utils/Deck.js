@@ -18,14 +18,13 @@ class Deck{
   shuffleDeck(){
     this.deck = []
     this.generateSixDecks()
-    console.log(this.deck)
     for(let i = 0; i<this.deck.length; i++){
       let random = Math.floor(Math.random() * (this.deck.length - 1))
       let tmp = this.deck[i]
       this.deck[i] = this.deck[random]
       this.deck[random] = tmp
     }
-    return {...this.deck}
+    return [...this.deck]
   }
 }
 

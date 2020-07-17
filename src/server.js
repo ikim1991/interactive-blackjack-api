@@ -36,6 +36,9 @@ io.on('connection', (socket) => {
   })
 
   socket.on('seatPlayer', (user, seatNumber) => {
+    if(!rooms[user.server].game.checkForPlayers()){
+      rooms[user.server].game.shuffleCheck()
+    }
     if(!findUser(user.username).seated){
       rooms[user.server].game.seatPlayer(user, seatNumber)
       socket.emit('updateUser', sendUserData(user.username, user.server))
@@ -45,7 +48,24 @@ io.on('connection', (socket) => {
     }
   })
 
+  socket.on('countdown', (count, user) => {
+    rooms[user.server].game.countDown(count)
+    io.to(user.server).emit('updateGame', rooms[user.server].game)
+  })
+
+  socket.on('dealCards', (user) => {
+    rooms[user.server].game.dealCards()
+    io.to(user.server).emit('updateGame', rooms[user.server].game)
+  })
+
   socket.on('placeBet', (bet, type, user) => {
+    if(rooms[user.server].game.checkForPlayers()){
+      if(rooms[user.server].game.checkForBets()){
+        rooms[user.server].game.phaseChange("betting")
+        io.to(user.server).emit('initiatePhase', rooms[user.server].game)
+      }
+    }
+
     if(type === "bet"){
       rooms[user.server].game.placeBet(bet, user)
       socket.emit('updateUser', sendUserData(user.username, user.server))
@@ -71,6 +91,13 @@ io.on('connection', (socket) => {
       socket.emit('updateUser', sendUserData(user.username, user.server))
       io.to(user.server).emit('updateGame', rooms[user.server].game)
     }
+  })
+
+  socket.on('unseat', (user) => {
+    const {username, seated, server, playerNumber } = user
+      rooms[server].game.playerExit(user, playerNumber)
+      socket.emit('updateUser', sendUserData(username, server))
+      io.to(server).emit('updateGame', rooms[server].game)
   })
 
   socket.on('logout', (userlogout) => {

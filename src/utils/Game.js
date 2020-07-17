@@ -36,18 +36,30 @@ class Game{
   }
 
   shuffleCheck(){
-    if(this.checkForPlauers()){
-      this.deck = (new Deck()).shuffleDeck()
-    }
+    this.game.deck = (new Deck()).shuffleDeck()
   }
 
   checkForPlayers(){
     for(let [key, value] of Object.entries(this.game.players)){
-      if(value.seated){
+      if(value.user.seated){
         return true
       }
     }
     return false
+  }
+
+  checkForBets(){
+    if(
+      (this.game.players['one'].bet === 0) &&
+      (this.game.players['two'].bet === 0) &&
+      (this.game.players['three'].bet === 0) &&
+      (this.game.players['four'].bet === 0) &&
+      (this.game.players['five'].bet === 0)
+    ){
+      return true
+    }else{
+      return false
+    }
   }
 
   placeBet(bet, user){
@@ -61,7 +73,7 @@ class Game{
 
   placeLucky(bet, user){
     const u = findUser(user.username)
-    if(bet <= u.chips){
+    if(bet <= u.chips && this.game.players[user.playerNumber].bet > 0){
       this.game.players[user.playerNumber].lucky += bet
       this.game.players[user.playerNumber].user.chips -= bet
       u.chips -= bet
@@ -80,6 +92,23 @@ class Game{
     this.game.players[user.playerNumber].user.chips += this.game.players[user.playerNumber].lucky
     u.chips += this.game.players[user.playerNumber].lucky
     this.game.players[user.playerNumber].lucky = 0
+  }
+
+  phaseChange(phase){
+    this.game.phase = phase
+  }
+
+  countDown(count){
+    if(count === 0){
+      this.game.dealer.text = "Dealing Cards..."
+    } else{
+      this.game.dealer.text = count.toString()
+    }
+
+  }
+
+  dealCards(){
+    console.log(this.game.deck.pop())
   }
 
 }
