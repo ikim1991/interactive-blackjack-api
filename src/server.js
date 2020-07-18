@@ -49,8 +49,18 @@ io.on('connection', (socket) => {
   })
 
   socket.on('countdown', (count, user) => {
-    rooms[user.server].game.countDown(count)
-    io.to(user.server).emit('updateGame', rooms[user.server].game)
+    if(
+      (!rooms[user.server].game.game.players['one'].user.seated) &&
+      (!rooms[user.server].game.game.players['two'].user.seated) &&
+      (!rooms[user.server].game.game.players['three'].user.seated) &&
+      (!rooms[user.server].game.game.players['four'].user.seated) &&
+      (!rooms[user.server].game.game.players['five'].user.seated)
+    ){
+      io.to(user.server).emit('stopCountdown')
+    } else{
+      rooms[user.server].game.countDown(count)
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+    }
   })
 
   socket.on('dealCards', (user) => {

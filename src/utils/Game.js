@@ -104,13 +104,41 @@ class Game{
     } else{
       this.game.dealer.text = count.toString()
     }
-
   }
 
   dealCards(){
-    console.log(this.game.deck.pop())
+    const { players, deck, dealer } = this.game
+    for(let key of ['five', 'four', 'three', 'two', 'one']){
+      if((players[key].user.seated && players[key].hand.length === 0) && (players[key].bet > 0 || players[key].lucky)){
+        players[key].hand.push(deck.pop())
+        players[key].count = this.calculateHand(players[key].hand)
+      }
+    }
+
+    if(dealer.firstCard.length === 0){
+      dealer.firstCard.push(deck.pop())
+    }
+
+    for(let key of ['five', 'four', 'three', 'two', 'one']){
+      if((players[key].user.seated && players[key].hand.length === 1) && (players[key].bet > 0 || players[key].lucky)){
+        players[key].hand.push(deck.pop())
+        players[key].count = this.calculateHand(players[key].hand)
+      }
+    }
+
+    if(dealer.hand.length === 0){
+      dealer.hand.push(deck.pop())
+      dealer.count = this.calculateHand(dealer.hand)
+    }
   }
 
+  calculateHand(hand){
+    let sum = 0
+    for(let i = 0; i < hand.length; i++){
+      sum += hand[i].value
+    }
+    return sum
+  }
 }
 
 module.exports = Game;
