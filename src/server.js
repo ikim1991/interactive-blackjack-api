@@ -8,6 +8,7 @@ const router = require('./router');
 const { generateMessage, findUser, userAuth, userSession, seatUser, unseatUser, sendUserData } = require('./utils/users');
 const { rooms } = require('./utils/rooms');
 const Game = require('./utils/Game');
+const { sleep } = require('./utils/Sleep');
 
 const app = express();
 const server = http.createServer(app);
@@ -57,14 +58,45 @@ io.on('connection', (socket) => {
       (!rooms[user.server].game.game.players['five'].user.seated)
     ){
       io.to(user.server).emit('stopCountdown')
+    } else if(count === 0){
+      rooms[user.server].game.game.dealer.text = "Dealing Cards..."
+      rooms[user.server].game.dealCards()
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+      sleep(1000)
+      for(let player of ["five", "four", "three", "two", "one"]){
+        if(rooms[user.server].game.game.players[player].user.seated){
+          if(rooms[user.server].game.game.players[player].bet > 0 || rooms[user.server].game.game.players[player].lucky > 0){
+            rooms[user.server].game.phaseChange(player)
+            io.to(user.server).emit('initiatePhase', rooms[user.server].game)
+            break
+          }
+        } else{
+          continue
+        }
+      }
     } else{
       rooms[user.server].game.countDown(count)
-      io.to(user.server).emit('updateGame', rooms[user.server].game)
     }
+    io.to(user.server).emit('updateGame', rooms[user.server].game)
   })
 
-  socket.on('dealCards', (user) => {
-    rooms[user.server].game.dealCards()
+  socket.on('hit', (user) => {
+    if(rooms[user.server].game.hitCard(user) > 21){
+      rooms[user.server].game.nextPlayer(user)
+    }
+
+    io.to(user.server).emit('updateGame', rooms[user.server].game)
+  })
+
+  socket.on('stay', (user) => {
+    rooms[user.server].game.nextPlayer(user)
+    io.to(user.server).emit('updateGame', rooms[user.server].game)
+  })
+
+  socket.on('double', (user) => {
+    rooms[user.server].game.hitCard(user)
+    rooms[user.server].game.doubleDown(user)
+    rooms[user.server].game.nextPlayer(user)
     io.to(user.server).emit('updateGame', rooms[user.server].game)
   })
 
