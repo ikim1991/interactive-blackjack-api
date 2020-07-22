@@ -101,6 +101,8 @@ class Game{
     } else if(phase === "dealer"){
       this.game.phase = phase
       this.game.dealer.text = "Dealer's Turn"
+    } else if(phase === "distribution"){
+      this.game.phase = phase
     } else{
       this.game.phase = phase
       this.game.players[phase].user.turn = true
@@ -156,53 +158,77 @@ class Game{
   nextPlayer(user){
     const { players, deck, dealer } = this.game
     const { playerNumber } = user
-    switch(playerNumber){
-      case "five":
-        players[playerNumber].user.turn = false
-        for(let player in ["four", "three", "two", "one"]){
-          if(players["four"].bet > 0 || players["four"].lucky > 0){
-            players["four"].user.turn = true
-            this.phaseChange("four")
-            this.game.dealer.text = "Player Fours' Turn"
-            break
-          }
-        }
 
-      case "four":
-        players[playerNumber].user.turn = false
-        for(let player in ["three", "two", "one"]){
-          if(players["three"].bet > 0 || players["three"].lucky > 0){
-            players["three"].user.turn = true
-            this.phaseChange("three")
-            this.game.dealer.text = "Player Threes' Turn"
-            break
-          }
+    if(playerNumber === "one"){
+      players[playerNumber].user.turn = false
+      this.phaseChange("dealer")
+    } else if(playerNumber === "five"){
+      players[playerNumber].user.turn = false
+      for(let player of ["four", "three", "two", "one"]){
+        if(players[player].bet > 0 || players[player].lucky > 0){
+          players[player].user.turn = true
+          this.phaseChange(player)
+          break
         }
-        case "three":
-          players[playerNumber].user.turn = false
-          for(let player in ["two", "one"]){
-            if(players["two"].bet > 0 || players["two"].lucky > 0){
-              players["two"].user.turn = true
-              this.phaseChange("two")
-              this.game.dealer.text = "Player Twos' Turn"
-              break
-            }
-          }
-        case "two":
-          players[playerNumber].user.turn = false
-          if(players["one"].bet > 0 || players["one"].lucky > 0){
-            players["one"].user.turn = true
-            this.phaseChange("one")
-            this.game.dealer.text = "Player Ones' Turn"
-            break
-          }
-        case "one":
-          players[playerNumber].user.turn = false
-          this.phaseChange("dealer")
-          break;
-        default:
-          this.phaseChange("dealer")
+      }
+    } else if(playerNumber === "four"){
+      players[playerNumber].user.turn = false
+      for(let player of ["three", "two", "one"]){
+        if(players[player].bet > 0 || players[player].lucky > 0){
+          players[player].user.turn = true
+          this.phaseChange(player)
+          break
+        }
+      }
+    } else if(playerNumber === "three"){
+      players[playerNumber].user.turn = false
+      for(let player of ["two", "one"]){
+        if(players[player].bet > 0 || players[player].lucky > 0){
+          players[player].user.turn = true
+          this.phaseChange(player)
+          break
+        }
+      }
+    } else if(playerNumber === "two"){
+      players[playerNumber].user.turn = false
+      if(players["one"].bet > 0 || players["one"].lucky > 0){
+        players["one"].user.turn = true
+        this.phaseChange("one")
+      }
     }
+
+    if(!players["one"].user.turn && !players["two"].user.turn && !players["three"].user.turn && !players["four"].user.turn && !players["five"].user.turn){
+      this.phaseChange("dealer")
+    }
+
+  }
+
+  initiateDealer(){
+    const { dealer, player, deck } = this.game
+    dealer.hand.push(dealer.firstCard.pop())
+    dealer.count = this.checkForAces(dealer.hand, this.calculateHand(dealer.hand))
+    dealer.text = `Dealer has ${dealer.count}`
+    this.game.phase = "dealer-hit"
+  }
+
+  dealerTurn(){
+    const { dealer, player, phase, deck } = this.game
+    if(dealer.count === 17){
+      dealer.text = "Dealer has 17! PUSH!"
+    } else if(dealer.count > 17 && dealer.count < 21){
+      dealer.text = `Dealer has ${dealer.count}`
+    } else if(dealer.count === 21 && dealer.hand.length === 2){
+      dealer.text = "Dealer BlackJack!"
+    } else if(dealer.count === 21){
+      dealer.text = `Dealer has ${dealer.count}`
+    } else if(dealer.count < 17){
+      dealer.hand.push(deck.pop())
+      dealer.count = this.checkForAces(dealer.hand, this.calculateHand(dealer.hand))
+      dealer.text = `Dealer has ${dealer.count}`
+    } else{
+      dealer.text = "Dealer Bust!"
+    }
+    return dealer.count
   }
 
   checkForAces(hand, count){
@@ -233,6 +259,10 @@ class Game{
     }
     return sum
   }
+
+  
+
+
 }
 
 module.exports = Game;

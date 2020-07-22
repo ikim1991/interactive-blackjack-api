@@ -63,17 +63,19 @@ io.on('connection', (socket) => {
       rooms[user.server].game.dealCards()
       io.to(user.server).emit('updateGame', rooms[user.server].game)
       sleep(1000)
-      for(let player of ["five", "four", "three", "two", "one"]){
-        if(rooms[user.server].game.game.players[player].user.seated){
-          if(rooms[user.server].game.game.players[player].bet > 0 || rooms[user.server].game.game.players[player].lucky > 0){
-            rooms[user.server].game.phaseChange(player)
-            io.to(user.server).emit('initiatePhase', rooms[user.server].game)
-            break
+      setTimeout(() => {
+        for(let player of ["five", "four", "three", "two", "one"]){
+          if(rooms[user.server].game.game.players[player].user.seated){
+            if(rooms[user.server].game.game.players[player].bet > 0 || rooms[user.server].game.game.players[player].lucky > 0){
+              rooms[user.server].game.phaseChange(player)
+              io.to(user.server).emit('initiatePhase', rooms[user.server].game)
+              break
+            }
+          } else{
+            continue
           }
-        } else{
-          continue
         }
-      }
+      }, 2500)
     } else{
       rooms[user.server].game.countDown(count)
     }
@@ -84,13 +86,36 @@ io.on('connection', (socket) => {
     if(rooms[user.server].game.hitCard(user) > 21){
       rooms[user.server].game.nextPlayer(user)
     }
-
     io.to(user.server).emit('updateGame', rooms[user.server].game)
+
+    if(rooms[user.server].game.game.phase === "dealer"){
+      rooms[user.server].game.initiateDealer()
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+    }
   })
 
   socket.on('stay', (user) => {
     rooms[user.server].game.nextPlayer(user)
     io.to(user.server).emit('updateGame', rooms[user.server].game)
+    if(rooms[user.server].game.game.phase === "dealer"){
+      rooms[user.server].game.initiateDealer()
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+      setTimeout(() => {
+        if(rooms[user.server].game.game.dealer.count < 17 || rooms[user.server].game.game.dealer.count > 2){
+          while(rooms[user.server].game.game.dealer.count < 17 || rooms[user.server].game.game.dealer.count > 21){
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+          }
+        }
+        setTimeout(() => {
+          rooms[user.server].game.dealerTurn()
+          io.to(user.server).emit('updateGame', rooms[user.server].game)
+
+          
+
+        }, 2000)
+      }, 4000)
+    }
   })
 
   socket.on('double', (user) => {
@@ -98,6 +123,10 @@ io.on('connection', (socket) => {
     rooms[user.server].game.doubleDown(user)
     rooms[user.server].game.nextPlayer(user)
     io.to(user.server).emit('updateGame', rooms[user.server].game)
+    if(rooms[user.server].game.game.phase === "dealer"){
+      rooms[user.server].game.initiateDealer()
+      io.to(user.server).emit('updateGame', rooms[user.server].game)
+    }
   })
 
   socket.on('placeBet', (bet, type, user) => {
