@@ -98,7 +98,10 @@ class Game{
   phaseChange(phase){
     if(phase === "betting"){
       this.game.phase = phase
-    } else if(phase === "dealer"){
+    } else if(phase === "waiting"){
+      this.game.phase = phase
+      this.game.dealer.text = "Place your Bets!"
+    }else if(phase === "dealer"){
       this.game.phase = phase
       this.game.dealer.text = "Dealer's Turn"
     } else if(phase === "distribution"){
@@ -207,7 +210,12 @@ class Game{
     const { dealer, player, deck } = this.game
     dealer.hand.push(dealer.firstCard.pop())
     dealer.count = this.checkForAces(dealer.hand, this.calculateHand(dealer.hand))
-    dealer.text = `Dealer has ${dealer.count}`
+    if(dealer.hand.length === 2 && dealer.count === 21){
+      dealer.text = `Dealer BlackJack!`
+    } else{
+      dealer.text = `Dealer Shows ${dealer.count}`
+    }
+
     this.game.phase = "dealer-hit"
   }
 
@@ -215,11 +223,9 @@ class Game{
     const { dealer, player, phase, deck } = this.game
     if(dealer.count === 17){
       dealer.text = "Dealer has 17! PUSH!"
-    } else if(dealer.count > 17 && dealer.count < 21){
-      dealer.text = `Dealer has ${dealer.count}`
     } else if(dealer.count === 21 && dealer.hand.length === 2){
       dealer.text = "Dealer BlackJack!"
-    } else if(dealer.count === 21){
+    } else if(dealer.count > 17 && dealer.count <= 21){
       dealer.text = `Dealer has ${dealer.count}`
     } else if(dealer.count < 17){
       dealer.hand.push(deck.pop())
@@ -260,7 +266,71 @@ class Game{
     return sum
   }
 
-  
+  checkForWinners(){
+    const { players, dealer } = this.game
+    for(let player in players){
+      if(players[player].bet > 0){
+        if(players[player].hand.length === 2 && players[player].count === 21){
+          if(dealer.count === 21 && dealer.hand.length === 2){
+            players[player].user.chips += Math.floor((players[player].bet * 1.5) + players[player].bet)
+            findUser(players[player].user.username).chips += Math.floor((players[player].bet * 1.5) + players[player].bet)
+          } else{
+            players[player].user.chips += Math.floor(players[player].bet * 2)
+            findUser(players[player].user.username).chips += Math.floor(players[player].bet * 2)
+          }
+        } else if((players[player].count <= 21 && players[player].count > dealer.count) && dealer.count <= 21){
+          players[player].user.chips += Math.floor(players[player].bet * 2)
+          findUser(players[player].user.username).chips += Math.floor(players[player].bet * 2)
+        } else if((players[player].count <= 21) && dealer.count > 21){
+          players[player].user.chips += Math.floor(players[player].bet * 2)
+          findUser(players[player].user.username).chips += Math.floor(players[player].bet * 2)
+        } else if((players[player].count === dealer.count) && !(dealer.count === 21 && dealer.hand.length === 2)){
+          players[player].user.chips += players[player].bet
+          findUser(players[player].user.username).chips += players[player].bet
+        } else{
+          continue
+        }
+      } else{
+        continue
+      }
+    }
+  }
+
+  resetTable(){
+    const { dealer, players, } = this.game
+    this.phaseChange("waiting")
+    dealer.hand = []
+    dealer.firstCard = []
+    dealer.count = 0
+
+    for(let player in players){
+      players[player].hand = []
+      players[player].count = 0
+      players[player].bet = 0
+      players[player].lucky = 0
+    }
+
+    if(this.game.deck.length < 156){
+      this.shuffleCheck()
+    }
+  }
+
+  resetGame(){
+    const { dealer, players, } = this.game
+    this.phaseChange("waiting")
+    dealer.hand = []
+    dealer.firstCard = []
+    dealer.count = 0
+
+    for(let player in players){
+      players[player].hand = []
+      players[player].count = 0
+      players[player].bet = 0
+      players[player].lucky = 0
+    }
+
+    this.shuffleCheck()
+  }
 
 
 }
