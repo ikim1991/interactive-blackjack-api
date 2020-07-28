@@ -96,7 +96,7 @@ io.on('connection', (socket) => {
     }
   })
 
-  socket.on('hit', (user) => {
+  socket.on('hit', (user, callback) => {
     if(rooms[user.server].game.hitCard(user) >= 21){
       rooms[user.server].game.nextPlayer(user)
     }
@@ -180,9 +180,10 @@ io.on('connection', (socket) => {
         }
       }
     }
+    callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
   })
 
-  socket.on('stay', (user) => {
+  socket.on('stay', (user, callback) => {
     rooms[user.server].game.nextPlayer(user)
     io.to(user.server).emit('updateGame', rooms[user.server].game)
 
@@ -264,9 +265,10 @@ io.on('connection', (socket) => {
         }
       }
     }
+    callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
   })
 
-  socket.on('double', (user) => {
+  socket.on('double', (user, callback) => {
     rooms[user.server].game.hitCard(user)
     rooms[user.server].game.doubleDown(user)
     rooms[user.server].game.nextPlayer(user)
@@ -350,6 +352,7 @@ io.on('connection', (socket) => {
         }
       }
     }
+    callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
   })
 
   socket.on('placeBet', (bet, type, user) => {
@@ -387,11 +390,12 @@ io.on('connection', (socket) => {
     }
   })
 
-  socket.on('unseat', (user) => {
+  socket.on('unseat', (user, callback) => {
     const {username, seated, server, playerNumber } = user
       rooms[server].game.playerExit(user, playerNumber)
       socket.emit('updateUser', sendUserData(username, server))
       io.to(server).emit('updateGame', rooms[server].game)
+      callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
   })
 
   socket.on('logout', (userlogout) => {
