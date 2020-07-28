@@ -245,13 +245,19 @@ class Game{
         numOfAces++
       }
     }
-    if(numOfAces === 1 && count === 21){
-      return 21
-    } else if(numOfAces > 1 && count > 21){
-      if((count - ((numOfAces - 1) * 10)) <= 21){
-        return (count - ((numOfAces - 1) * 10))
+    if(numOfAces > 0){
+      if(count === 21 && hand.length === 2){
+        return 21
+      } else if(count > 21 && numOfAces === 1){
+        return (count - 10)
+      } else if(count > 21 && numOfAces > 1){
+        if((count - ((numOfAces - 1) * 10)) <= 21){
+          return (count - ((numOfAces - 1) * 10))
+        } else{
+          return (count - (numOfAces * 10))
+        }
       } else{
-        return (count - (numOfAces * 10))
+        return count
       }
     } else{
       return count
@@ -294,6 +300,18 @@ class Game{
         continue
       }
     }
+  }
+
+  checkBust(){
+    const { players } = this.game
+    for(let player in players){
+      if(players[player].count <= 21 && players[player].count > 0){
+        return false
+      } else{
+        continue
+      }
+    }
+    return true
   }
 
   resetTable(){
