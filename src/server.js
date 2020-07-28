@@ -76,17 +76,73 @@ io.on('connection', (socket) => {
           io.to(user.server).emit('updateGame', rooms[user.server].game)
         }
 
-      sleep(1000)
+      sleep(250)
       setTimeout(() => {
-        for(let player of ["five", "four", "three", "two", "one"]){
-          if(rooms[user.server].game.game.players[player].user.seated){
-            if(rooms[user.server].game.game.players[player].bet > 0 || rooms[user.server].game.game.players[player].lucky > 0){
-              rooms[user.server].game.phaseChange(player)
-              io.to(user.server).emit('initiatePhase', rooms[user.server].game)
-              break
-            }
+        for(let player of ["five", "four", "three", "two", "one", "dealer"]){
+          if(player === "dealer"){
+            rooms[user.server].game.phaseChange(player)
+            rooms[user.server].game.initiateDealer()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+
+            let int = setInterval(() =>{
+              if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
+                rooms[user.server].game.dealerTurn()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+                clearInterval(int)
+                setTimeout(() => {
+                  rooms[user.server].game.checkForWinners()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  setTimeout(() => {
+                    rooms[user.server].game.resetTable()
+                    io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  }, 3000)
+                }, 2000)
+              } else if(rooms[user.server].game.game.dealer.count > 21){
+                rooms[user.server].game.dealerTurn()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+                clearInterval(int)
+                setTimeout(() => {
+                  rooms[user.server].game.checkForWinners()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  setTimeout(() => {
+                    rooms[user.server].game.resetTable()
+                    io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  }, 3000)
+                }, 2000)
+              } else{
+                rooms[user.server].game.dealerTurn()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+                if(rooms[user.server].game.game.dealer.count >= 17){
+                  rooms[user.server].game.dealerTurn()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  clearInterval(int)
+                }
+                setTimeout(() => {
+                  rooms[user.server].game.checkForWinners()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  setTimeout(() => {
+                    rooms[user.server].game.resetTable()
+                    io.to(user.server).emit('updateGame', rooms[user.server].game)
+                  }, 3000)
+                }, 2000)
+              }
+              if(
+                (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
+                (rooms[user.server].game.game.dealer.count > 21)
+              ){
+                clearInterval(int)
+              }
+            }, 2000)
           } else{
-            continue
+            if(rooms[user.server].game.game.players[player].user.seated && rooms[user.server].game.game.players[player].count !== 21){
+              if(rooms[user.server].game.game.players[player].bet > 0 || rooms[user.server].game.game.players[player].lucky > 0){
+                rooms[user.server].game.phaseChange(player)
+                io.to(user.server).emit('initiatePhase', rooms[user.server].game)
+                break
+              }
+            } else{
+              continue
+            }
           }
         }
       }, 2500)
@@ -109,75 +165,62 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
-        }, 4000)
-      }, 3000)
+        }, 3000)
+      }, 2000)
     } else{
       if(rooms[user.server].game.game.phase === "dealer"){
         rooms[user.server].game.initiateDealer()
         io.to(user.server).emit('updateGame', rooms[user.server].game)
 
-        if(rooms[user.server].game.game.dealer.count < 17 || rooms[user.server].game.game.dealer.count > 21){
-          let int = setInterval(() =>{
-            if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              clearInterval(int)
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            } else if(rooms[user.server].game.game.dealer.count > 21){
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              clearInterval(int)
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            } else{
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              if(rooms[user.server].game.game.dealer.count >= 17){
-                rooms[user.server].game.dealerTurn()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                clearInterval(int)
-              }
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            }
-            if(
-              (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
-              (rooms[user.server].game.game.dealer.count > 21)
-            ){
-              clearInterval(int)
-            }
-          }, 3000)
-        } else{
-          rooms[user.server].game.dealerTurn()
-          io.to(user.server).emit('updateGame', rooms[user.server].game)
-          setTimeout(() => {
-            rooms[user.server].game.checkForWinners()
+        let int = setInterval(() =>{
+          if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
+            rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
+            clearInterval(int)
             setTimeout(() => {
-              rooms[user.server].game.resetTable()
+              rooms[user.server].game.checkForWinners()
               io.to(user.server).emit('updateGame', rooms[user.server].game)
-            }, 4000)
-          }, 3000)
-        }
+              setTimeout(() => {
+                rooms[user.server].game.resetTable()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+              }, 3000)
+            }, 2000)
+          } else if(rooms[user.server].game.game.dealer.count > 21){
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            clearInterval(int)
+            setTimeout(() => {
+              rooms[user.server].game.checkForWinners()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+              setTimeout(() => {
+                rooms[user.server].game.resetTable()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+              }, 3000)
+            }, 2000)
+          } else{
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            if(rooms[user.server].game.game.dealer.count >= 17){
+              rooms[user.server].game.dealerTurn()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+              clearInterval(int)
+              setTimeout(() => {
+                rooms[user.server].game.checkForWinners()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+                setTimeout(() => {
+                  rooms[user.server].game.resetTable()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                }, 3000)
+              }, 2000)
+            }
+          }
+          if(
+            (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
+            (rooms[user.server].game.game.dealer.count > 21)
+          ){
+            clearInterval(int)
+          }
+        }, 2000)
       }
     }
     callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
@@ -194,75 +237,62 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
-        }, 4000)
-      }, 3000)
+        }, 3000)
+      }, 2000)
     } else{
       if(rooms[user.server].game.game.phase === "dealer"){
         rooms[user.server].game.initiateDealer()
         io.to(user.server).emit('updateGame', rooms[user.server].game)
 
-        if(rooms[user.server].game.game.dealer.count < 17 || rooms[user.server].game.game.dealer.count > 21){
-          let int = setInterval(() =>{
-            if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              clearInterval(int)
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            } else if(rooms[user.server].game.game.dealer.count > 21){
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              clearInterval(int)
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            } else{
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              if(rooms[user.server].game.game.dealer.count >= 17){
-                rooms[user.server].game.dealerTurn()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                clearInterval(int)
-              }
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            }
-            if(
-              (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
-              (rooms[user.server].game.game.dealer.count > 21)
-            ){
-              clearInterval(int)
-            }
-          }, 3000)
-        } else{
-          rooms[user.server].game.dealerTurn()
-          io.to(user.server).emit('updateGame', rooms[user.server].game)
-          setTimeout(() => {
-            rooms[user.server].game.checkForWinners()
+        let int = setInterval(() =>{
+          if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
+            rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
+            clearInterval(int)
             setTimeout(() => {
-              rooms[user.server].game.resetTable()
+              rooms[user.server].game.checkForWinners()
               io.to(user.server).emit('updateGame', rooms[user.server].game)
-            }, 4000)
-          }, 3000)
-        }
+              setTimeout(() => {
+                rooms[user.server].game.resetTable()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+              }, 3000)
+            }, 2000)
+          } else if(rooms[user.server].game.game.dealer.count > 21){
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            clearInterval(int)
+            setTimeout(() => {
+              rooms[user.server].game.checkForWinners()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+              setTimeout(() => {
+                rooms[user.server].game.resetTable()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+              }, 3000)
+            }, 2000)
+          } else{
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            if(rooms[user.server].game.game.dealer.count >= 17){
+              rooms[user.server].game.dealerTurn()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+              clearInterval(int)
+              setTimeout(() => {
+                rooms[user.server].game.checkForWinners()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+                setTimeout(() => {
+                  rooms[user.server].game.resetTable()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                }, 3000)
+              }, 2000)
+            }
+          }
+          if(
+            (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
+            (rooms[user.server].game.game.dealer.count > 21)
+          ){
+            clearInterval(int)
+          }
+        }, 2000)
       }
     }
     callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
@@ -281,75 +311,62 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
-        }, 4000)
-      }, 3000)
+        }, 3000)
+      }, 2000)
     } else{
       if(rooms[user.server].game.game.phase === "dealer"){
         rooms[user.server].game.initiateDealer()
         io.to(user.server).emit('updateGame', rooms[user.server].game)
 
-        if(rooms[user.server].game.game.dealer.count < 17 || rooms[user.server].game.game.dealer.count > 21){
-          let int = setInterval(() =>{
-            if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              clearInterval(int)
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            } else if(rooms[user.server].game.game.dealer.count > 21){
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              clearInterval(int)
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            } else{
-              rooms[user.server].game.dealerTurn()
-              io.to(user.server).emit('updateGame', rooms[user.server].game)
-              if(rooms[user.server].game.game.dealer.count >= 17){
-                rooms[user.server].game.dealerTurn()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                clearInterval(int)
-              }
-              setTimeout(() => {
-                rooms[user.server].game.checkForWinners()
-                io.to(user.server).emit('updateGame', rooms[user.server].game)
-                setTimeout(() => {
-                  rooms[user.server].game.resetTable()
-                  io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 4000)
-              }, 3000)
-            }
-            if(
-              (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
-              (rooms[user.server].game.game.dealer.count > 21)
-            ){
-              clearInterval(int)
-            }
-          }, 3000)
-        } else{
-          rooms[user.server].game.dealerTurn()
-          io.to(user.server).emit('updateGame', rooms[user.server].game)
-          setTimeout(() => {
-            rooms[user.server].game.checkForWinners()
+        let int = setInterval(() =>{
+          if(rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21){
+            rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
+            clearInterval(int)
             setTimeout(() => {
-              rooms[user.server].game.resetTable()
+              rooms[user.server].game.checkForWinners()
               io.to(user.server).emit('updateGame', rooms[user.server].game)
-            }, 4000)
-          }, 3000)
-        }
+              setTimeout(() => {
+                rooms[user.server].game.resetTable()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+              }, 3000)
+            }, 2000)
+          } else if(rooms[user.server].game.game.dealer.count > 21){
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            clearInterval(int)
+            setTimeout(() => {
+              rooms[user.server].game.checkForWinners()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+              setTimeout(() => {
+                rooms[user.server].game.resetTable()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+              }, 3000)
+            }, 2000)
+          } else{
+            rooms[user.server].game.dealerTurn()
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            if(rooms[user.server].game.game.dealer.count >= 17){
+              rooms[user.server].game.dealerTurn()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+              clearInterval(int)
+              setTimeout(() => {
+                rooms[user.server].game.checkForWinners()
+                io.to(user.server).emit('updateGame', rooms[user.server].game)
+                setTimeout(() => {
+                  rooms[user.server].game.resetTable()
+                  io.to(user.server).emit('updateGame', rooms[user.server].game)
+                }, 3000)
+              }, 2000)
+            }
+          }
+          if(
+            (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
+            (rooms[user.server].game.game.dealer.count > 21)
+          ){
+            clearInterval(int)
+          }
+        }, 2000)
       }
     }
     callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
@@ -393,6 +410,9 @@ io.on('connection', (socket) => {
   socket.on('unseat', (user, callback) => {
     const {username, seated, server, playerNumber } = user
       rooms[server].game.playerExit(user, playerNumber)
+      if(!rooms[server].game.checkForPlayers()){
+        rooms[server].game.resetGame()
+      }
       socket.emit('updateUser', sendUserData(username, server))
       io.to(server).emit('updateGame', rooms[server].game)
       callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
@@ -405,6 +425,9 @@ io.on('connection', (socket) => {
     userSession(username)
     if(seated){
       rooms[server].game.playerExit(userlogout, playerNumber)
+    }
+    if(!rooms[server].game.checkForPlayers()){
+      rooms[server].game.resetGame()
     }
     io.to(server).emit('updateGame', rooms[server].game)
     io.to(server).emit('updateUsers', rooms[server].users)

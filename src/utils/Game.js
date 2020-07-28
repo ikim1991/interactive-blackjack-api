@@ -133,7 +133,7 @@ class Game{
     for(let key of ['five', 'four', 'three', 'two', 'one']){
       if((players[key].user.seated && players[key].hand.length === 1) && (players[key].bet > 0 || players[key].lucky > 0)){
         players[key].hand.push(deck.pop())
-        players[key].count = this.calculateHand(players[key].hand)
+        players[key].count = this.checkForAces(players[key].hand, this.calculateHand(players[key].hand))
       }
     }
 
@@ -168,6 +168,9 @@ class Game{
     } else if(playerNumber === "five"){
       players[playerNumber].user.turn = false
       for(let player of ["four", "three", "two", "one"]){
+        if(players[player].count === 21){
+          continue
+        }
         if(players[player].bet > 0 || players[player].lucky > 0){
           players[player].user.turn = true
           this.phaseChange(player)
@@ -177,6 +180,9 @@ class Game{
     } else if(playerNumber === "four"){
       players[playerNumber].user.turn = false
       for(let player of ["three", "two", "one"]){
+        if(players[player].count === 21){
+          continue
+        }
         if(players[player].bet > 0 || players[player].lucky > 0){
           players[player].user.turn = true
           this.phaseChange(player)
@@ -186,6 +192,9 @@ class Game{
     } else if(playerNumber === "three"){
       players[playerNumber].user.turn = false
       for(let player of ["two", "one"]){
+        if(players[player].count === 21){
+          continue
+        }
         if(players[player].bet > 0 || players[player].lucky > 0){
           players[player].user.turn = true
           this.phaseChange(player)
@@ -194,9 +203,13 @@ class Game{
       }
     } else if(playerNumber === "two"){
       players[playerNumber].user.turn = false
-      if(players["one"].bet > 0 || players["one"].lucky > 0){
-        players["one"].user.turn = true
-        this.phaseChange("one")
+      if(players["one"].count === 21){
+        this.phaseChange("dealer")
+      } else{
+        if(players["one"].bet > 0 || players["one"].lucky > 0){
+          players["one"].user.turn = true
+          this.phaseChange("one")
+        }
       }
     }
 
@@ -266,10 +279,15 @@ class Game{
 
   calculateHand(hand){
     let sum = 0
-    for(let i = 0; i < hand.length; i++){
-      sum += hand[i].value
+    if(hand){
+      for(let i = 0; i < hand.length; i++){
+        sum += hand[i].value
+      }
+      return sum
+    } else{
+      return 22
     }
-    return sum
+
   }
 
   checkForWinners(){
