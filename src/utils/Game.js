@@ -355,30 +355,35 @@ class Game{
   checkForWinners(){
     const { players, dealer } = this.game
     for(let player in players){
-      if(players[player].bet > 0){
+      if(players[player].bet > 0 && players[player].count <= 21){
         if(players[player].hand.length === 2 && players[player].count === 21){
           if(dealer.count === 21 && dealer.hand.length === 2){
-            players[player].user.chips += Math.floor((players[player].bet * 1.5) + players[player].bet)
-            findUser(players[player].user.username).chips += Math.floor((players[player].bet * 1.5) + players[player].bet)
-          } else{
             players[player].user.chips += Math.floor(players[player].bet * 2)
             findUser(players[player].user.username).chips += Math.floor(players[player].bet * 2)
+          } else{
+            players[player].user.chips += Math.floor((players[player].bet * 1.5) + players[player].bet)
+            findUser(players[player].user.username).chips += Math.floor((players[player].bet * 1.5) + players[player].bet)
           }
-        } else if((players[player].count <= 21 && players[player].count > dealer.count) && dealer.count <= 21){
+        } else if(dealer.count > 21){
           players[player].user.chips += Math.floor(players[player].bet * 2)
           findUser(players[player].user.username).chips += Math.floor(players[player].bet * 2)
-        } else if((players[player].count <= 21) && dealer.count > 21){
+        } else if((players[player].count > dealer.count)){
           players[player].user.chips += Math.floor(players[player].bet * 2)
           findUser(players[player].user.username).chips += Math.floor(players[player].bet * 2)
-        } else if((players[player].count === dealer.count) && !(dealer.count === 21 && dealer.hand.length === 2)){
-          players[player].user.chips += players[player].bet
-          findUser(players[player].user.username).chips += players[player].bet
+        } else if(players[player].count === dealer.count){
+          if(dealer.count === 21 && dealer.hand.length === 2){
+            continue
+          } else{
+            players[player].user.chips += players[player].bet
+            findUser(players[player].user.username).chips += players[player].bet
+          }
         } else{
           continue
         }
       } else{
         continue
       }
+      players[player].bet = 0
     }
   }
 
