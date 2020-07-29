@@ -18,7 +18,37 @@ const users = [
     seated:false,
     turn: false,
     sessionID: ""
-  }
+  },
+  {
+    username: "player1234",
+    password: "player1234",
+    chips: 1000,
+    authenticated: false,
+    playerNumber: "",
+    seated:false,
+    turn: false,
+    sessionID: ""
+  },
+  {
+    username: "blackjack21",
+    password: "blackjack21",
+    chips: 1000,
+    authenticated: false,
+    playerNumber: "",
+    seated:false,
+    turn: false,
+    sessionID: ""
+  },
+  {
+    username: "chris1234",
+    password: "chris1234",
+    chips: 1000,
+    authenticated: false,
+    playerNumber: "",
+    seated:false,
+    turn: false,
+    sessionID: ""
+  },
 ]
 
 const findUser = (username) => {
@@ -70,7 +100,11 @@ const registerUser = (username, password) => {
     username: username,
     password: password,
     chips: 1000,
-    authenticated: false
+    authenticated: false,
+    playerNumber: "",
+    seated: false,
+    turn: false,
+    sessionID: ""
   })
 }
 

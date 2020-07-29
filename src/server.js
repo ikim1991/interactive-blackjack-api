@@ -77,8 +77,8 @@ io.on('connection', (socket) => {
             setTimeout(() => {
               rooms[user.server].game.checkLucky()
               io.to(user.server).emit('updateGame', rooms[user.server].game)
-            }, 3000)
-          }, 2000)
+            }, 3500)
+          }, 2500)
         } else{
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -103,8 +103,8 @@ io.on('connection', (socket) => {
                   setTimeout(() => {
                     rooms[user.server].game.resetTable()
                     io.to(user.server).emit('updateGame', rooms[user.server].game)
-                  }, 3000)
-                }, 2000)
+                  }, 3500)
+                }, 2500)
               } else if(rooms[user.server].game.game.dealer.count > 21){
                 rooms[user.server].game.dealerTurn()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -115,8 +115,8 @@ io.on('connection', (socket) => {
                   setTimeout(() => {
                     rooms[user.server].game.resetTable()
                     io.to(user.server).emit('updateGame', rooms[user.server].game)
-                  }, 3000)
-                }, 2000)
+                  }, 3500)
+                }, 2500)
               } else{
                 rooms[user.server].game.dealerTurn()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -131,8 +131,8 @@ io.on('connection', (socket) => {
                   setTimeout(() => {
                     rooms[user.server].game.resetTable()
                     io.to(user.server).emit('updateGame', rooms[user.server].game)
-                  }, 3000)
-                }, 2000)
+                  }, 3500)
+                }, 2500)
               }
               if(
                 (rooms[user.server].game.game.dealer.count >= 17 && rooms[user.server].game.game.dealer.count <= 21) ||
@@ -140,7 +140,7 @@ io.on('connection', (socket) => {
               ){
                 clearInterval(int)
               }
-            }, 2000)
+            }, 2500)
           } else{
             if(rooms[user.server].game.game.players[player].user.seated && rooms[user.server].game.game.players[player].count !== 21){
               if(rooms[user.server].game.game.players[player].bet > 0 || rooms[user.server].game.game.players[player].lucky > 0){
@@ -173,8 +173,8 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
-        }, 3000)
-      }, 2000)
+        }, 3500)
+      }, 2500)
     } else{
       if(rooms[user.server].game.game.phase === "dealer"){
         rooms[user.server].game.initiateDealer()
@@ -191,8 +191,8 @@ io.on('connection', (socket) => {
               setTimeout(() => {
                 rooms[user.server].game.resetTable()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
-              }, 3000)
-            }, 2000)
+              }, 3500)
+            }, 2500)
           } else if(rooms[user.server].game.game.dealer.count > 21){
             rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -203,8 +203,8 @@ io.on('connection', (socket) => {
               setTimeout(() => {
                 rooms[user.server].game.resetTable()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
-              }, 3000)
-            }, 2000)
+              }, 3500)
+            }, 2500)
           } else{
             rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -218,8 +218,8 @@ io.on('connection', (socket) => {
                 setTimeout(() => {
                   rooms[user.server].game.resetTable()
                   io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 3000)
-              }, 2000)
+                }, 3500)
+              }, 2500)
             }
           }
           if(
@@ -228,7 +228,7 @@ io.on('connection', (socket) => {
           ){
             clearInterval(int)
           }
-        }, 2000)
+        }, 2500)
       }
     }
     callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
@@ -245,8 +245,8 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
-        }, 3000)
-      }, 2000)
+        }, 3500)
+      }, 2500)
     } else{
       if(rooms[user.server].game.game.phase === "dealer"){
         rooms[user.server].game.initiateDealer()
@@ -263,8 +263,8 @@ io.on('connection', (socket) => {
               setTimeout(() => {
                 rooms[user.server].game.resetTable()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
-              }, 3000)
-            }, 2000)
+              }, 3500)
+            }, 2500)
           } else if(rooms[user.server].game.game.dealer.count > 21){
             rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -275,8 +275,8 @@ io.on('connection', (socket) => {
               setTimeout(() => {
                 rooms[user.server].game.resetTable()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
-              }, 3000)
-            }, 2000)
+              }, 3500)
+            }, 2500)
           } else{
             rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -290,8 +290,8 @@ io.on('connection', (socket) => {
                 setTimeout(() => {
                   rooms[user.server].game.resetTable()
                   io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 3000)
-              }, 2000)
+                }, 3500)
+              }, 2500)
             }
           }
           if(
@@ -300,7 +300,7 @@ io.on('connection', (socket) => {
           ){
             clearInterval(int)
           }
-        }, 2000)
+        }, 2500)
       }
     }
     callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
@@ -319,8 +319,8 @@ io.on('connection', (socket) => {
         setTimeout(() => {
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
-        }, 3000)
-      }, 2000)
+        }, 3500)
+      }, 2500)
     } else{
       if(rooms[user.server].game.game.phase === "dealer"){
         rooms[user.server].game.initiateDealer()
@@ -337,8 +337,8 @@ io.on('connection', (socket) => {
               setTimeout(() => {
                 rooms[user.server].game.resetTable()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
-              }, 3000)
-            }, 2000)
+              }, 3500)
+            }, 2500)
           } else if(rooms[user.server].game.game.dealer.count > 21){
             rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -349,8 +349,8 @@ io.on('connection', (socket) => {
               setTimeout(() => {
                 rooms[user.server].game.resetTable()
                 io.to(user.server).emit('updateGame', rooms[user.server].game)
-              }, 3000)
-            }, 2000)
+              }, 3500)
+            }, 2500)
           } else{
             rooms[user.server].game.dealerTurn()
             io.to(user.server).emit('updateGame', rooms[user.server].game)
@@ -364,8 +364,8 @@ io.on('connection', (socket) => {
                 setTimeout(() => {
                   rooms[user.server].game.resetTable()
                   io.to(user.server).emit('updateGame', rooms[user.server].game)
-                }, 3000)
-              }, 2000)
+                }, 3500)
+              }, 2500)
             }
           }
           if(
@@ -374,7 +374,7 @@ io.on('connection', (socket) => {
           ){
             clearInterval(int)
           }
-        }, 2000)
+        }, 2500)
       }
     }
     callback(rooms[user.server].game.game.players[user.playerNumber].user.turn)
