@@ -143,6 +143,68 @@ class Game{
     }
   }
 
+  checkLucky(){
+    const { players, dealer } = this.game
+
+    for(let player of ["one", "two", "three", "four", "five"]){
+      if(players[player].lucky > 0){
+        players[player].user.chips += (players[player].lucky * this.luckyCount(players[player].hand, dealer.hand))
+        findUser(players[player].user.username).chips += (players[player].lucky * this.luckyCount(players[player].hand, dealer.hand))
+        players[player].lucky = 0
+      } else{
+        continue
+      }
+    }
+  }
+
+  luckyCount(playerHand, dealerHand){
+    let cards = [...playerHand, ...dealerHand].map(card => card.value)
+    let suits = [...playerHand, ...dealerHand].map(card => card.suit)
+    let aces = [...playerHand, ...dealerHand].filter(card => card.number === 'a').length
+    let sum = cards.reduce((acc, currentValue) => acc + currentValue)
+    let suited = suits.filter(card => card === suits[0]).length
+
+    if(sum === 21){
+      if(cards[0] === 7 && (cards[1] === 7 && cards[2] === 7)){
+        if(suited === 3){
+          return 200
+        } else{
+          return 50
+        }
+      } else if(cards.includes(6) && (cards.includes(7) && cards.includes(8))){
+        if(suited === 3){
+          return 100
+        } else{
+          return 30
+        }
+      } else{
+        if(suited === 3){
+          return 15
+        } else{
+          return 3
+        }
+      }
+    } else if(sum === 20){
+      return 2
+    } else if(sum === 19){
+      return 2
+    } else if(aces > 0){
+      if(sum - 10 === 21 || sum - 20 === 21){
+        if(suited === 3){
+          return 15
+        }
+      } else if(sum - 10 === 20 || sum - 20 === 20){
+        return 2
+      } else if(sum - 10 === 19 || sum - 20 === 19){
+        return 2
+      } else{
+        return 0
+      }
+    } else{
+      return 0
+    }
+  }
+
   hitCard(user){
     const { players, deck } = this.game
     const { playerNumber } = user

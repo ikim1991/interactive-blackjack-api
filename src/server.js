@@ -71,6 +71,14 @@ io.on('connection', (socket) => {
           rooms[user.server].game.game.dealer.text = "Dealing Cards..."
           rooms[user.server].game.dealCards()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
+          setTimeout(()=> {
+            rooms[user.server].game.game.dealer.text = "Checking Lucky Lucky Winners"
+            io.to(user.server).emit('updateGame', rooms[user.server].game)
+            setTimeout(() => {
+              rooms[user.server].game.checkLucky()
+              io.to(user.server).emit('updateGame', rooms[user.server].game)
+            }, 3000)
+          }, 2000)
         } else{
           rooms[user.server].game.resetTable()
           io.to(user.server).emit('updateGame', rooms[user.server].game)
