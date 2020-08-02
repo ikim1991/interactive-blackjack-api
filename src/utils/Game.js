@@ -192,6 +192,8 @@ class Game{
       if(sum - 10 === 21 || sum - 20 === 21){
         if(suited === 3){
           return 15
+        } else{
+          return 3
         }
       } else if(sum - 10 === 20 || sum - 20 === 20){
         return 2
