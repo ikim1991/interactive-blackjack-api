@@ -15,9 +15,6 @@ const server = http.createServer(app);
 const cors = require('cors');
 const io = socketio(server);
 
-
-const game = new Game()
-
 io.on('connection', (socket) => {
   console.log("Client Connected...");
 

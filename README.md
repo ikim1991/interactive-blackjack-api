@@ -1,6 +1,8 @@
-# Interactive BlackJack Back-end App  
+# Interactive BlackJack Back-end  
 
 ### Summary  
+
+As a personal project, just for fun, I developed this multiplayer, interactive game of 6-deck BlackJack.  
 
 The back-end application is hosted on Heroku using its free-tier plan. This may cause the first login to take a few seconds to load as the app is put to sleep after 30 minutes of inactivity.  
 
